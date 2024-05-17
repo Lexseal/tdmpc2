@@ -33,8 +33,6 @@ class TDMPC2:
 			[self._get_discount(ep_len) for ep_len in cfg.episode_lengths], device='cuda'
 		) if self.cfg.multitask else self._get_discount(cfg.episode_length)
 
-	# def _get_horizon(self, )
-
 	def _get_discount(self, episode_length):
 		"""
 		Returns discount factor for a given episode length.
@@ -136,7 +134,13 @@ class TDMPC2:
 		mean = torch.zeros(horizon, self.cfg.action_dim, device=self.device)
 		std = self.cfg.max_std*torch.ones(horizon, self.cfg.action_dim, device=self.device)
 		if not t0:
-			mean[:-1] = self._prev_mean[1:]
+			# it's possible that the shapes don't match, in which case we need to do something creative
+			if mean.shape[0] == self._prev_mean.shape[0]:
+				mean[:-1] = self._prev_mean[1:]
+			elif mean.shape[0] > self._prev_mean.shape[0]:
+				mean[:self._prev_mean.shape[0]] = self._prev_mean
+			else:
+				mean = self._prev_mean[:mean.shape[0]]
 		actions = torch.empty(horizon, self.cfg.num_samples, self.cfg.action_dim, device=self.device)
 		if self.cfg.num_pi_trajs > 0:
 			actions[:, :self.cfg.num_pi_trajs] = pi_actions
@@ -231,7 +235,7 @@ class TDMPC2:
 		Returns:
 			dict: Dictionary of training statistics.
 		"""
-		obs, action, reward, task = buffer.sample()
+		obs, action, reward, task = buffer.sample(horizon)
 	
 		# Compute targets
 		with torch.no_grad():
@@ -293,4 +297,5 @@ class TDMPC2:
 			"total_loss": float(total_loss.mean().item()),
 			"grad_norm": float(grad_norm),
 			"pi_scale": float(self.scale.value),
+			"horizon": horizon,
 		}

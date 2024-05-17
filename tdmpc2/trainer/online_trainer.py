@@ -64,11 +64,22 @@ class OnlineTrainer(Trainer):
 		), batch_size=(1,))
 		return td
 
+	def get_horizon(self, steps, increase_stop=150_000, decrease_stop=200_000):
+		"""
+		Return the horizon for the current step, starting at self.cfg.min_horizon and ending at self.cfg.max_horizon
+		We will just do a linear interpolation between the two values.
+		"""
+		if steps >= decrease_stop:
+			return self.cfg.horizon
+		elif steps >= increase_stop:
+			# do a linear interpolation between max_horizon and horizon
+			return int(self.cfg.max_horizon + (self.cfg.horizon - self.cfg.max_horizon) * (steps - increase_stop) / (decrease_stop - increase_stop))
+		return int(self.cfg.min_horizon + (self.cfg.max_horizon - self.cfg.min_horizon) * steps / increase_stop)
+
 	def train(self):
 		"""Train a TD-MPC2 agent."""
 		train_metrics, done, eval_next = {}, True, True
 		while self._step <= self.cfg.steps:
-
 			# Evaluate agent periodically
 			if self._step % self.cfg.eval_freq == 0:
 				eval_next = True
@@ -93,9 +104,10 @@ class OnlineTrainer(Trainer):
 				obs = self.env.reset()
 				self._tds = [self.to_td(obs)]
 
+			horizon = self.get_horizon(self._step)
 			# Collect experience
 			if self._step > self.cfg.seed_steps:
-				action = self.agent.act(obs, t0=len(self._tds)==1, horizon=self.cfg.horizon)
+				action = self.agent.act(obs, t0=len(self._tds)==1, horizon=horizon)
 			else:
 				action = self.env.rand_act()
 			obs, reward, done, info = self.env.step(action)
@@ -109,7 +121,7 @@ class OnlineTrainer(Trainer):
 				else:
 					num_updates = 1
 				for _ in range(num_updates):
-					_train_metrics = self.agent.update(self.buffer, self.cfg.horizon)
+					_train_metrics = self.agent.update(self.buffer, horizon)
 				train_metrics.update(_train_metrics)
 
 			self._step += 1
