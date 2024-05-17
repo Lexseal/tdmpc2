@@ -95,7 +95,7 @@ class OnlineTrainer(Trainer):
 
 			# Collect experience
 			if self._step > self.cfg.seed_steps:
-				action = self.agent.act(obs, t0=len(self._tds)==1)
+				action = self.agent.act(obs, t0=len(self._tds)==1, horizon=self.cfg.horizon)
 			else:
 				action = self.env.rand_act()
 			obs, reward, done, info = self.env.step(action)
@@ -109,7 +109,7 @@ class OnlineTrainer(Trainer):
 				else:
 					num_updates = 1
 				for _ in range(num_updates):
-					_train_metrics = self.agent.update(self.buffer)
+					_train_metrics = self.agent.update(self.buffer, self.cfg.horizon)
 				train_metrics.update(_train_metrics)
 
 			self._step += 1

@@ -33,6 +33,8 @@ class TDMPC2:
 			[self._get_discount(ep_len) for ep_len in cfg.episode_lengths], device='cuda'
 		) if self.cfg.multitask else self._get_discount(cfg.episode_length)
 
+	# def _get_horizon(self, )
+
 	def _get_discount(self, episode_length):
 		"""
 		Returns discount factor for a given episode length.
@@ -68,7 +70,7 @@ class TDMPC2:
 		self.model.load_state_dict(state_dict["model"])
 
 	@torch.no_grad()
-	def act(self, obs, t0=False, eval_mode=False, task=None):
+	def act(self, obs, t0=False, eval_mode=False, task=None, horizon=None):
 		"""
 		Select an action by planning in the latent space of the world model.
 		
@@ -81,21 +83,23 @@ class TDMPC2:
 		Returns:
 			torch.Tensor: Action to take in the environment.
 		"""
+		if horizon is None:
+			horizon = self.cfg.horizon
 		obs = obs.to(self.device, non_blocking=True).unsqueeze(0)
 		if task is not None:
 			task = torch.tensor([task], device=self.device)
 		z = self.model.encode(obs, task)
 		if self.cfg.mpc:
-			a = self.plan(z, t0=t0, eval_mode=eval_mode, task=task)
+			a = self.plan(z, t0=t0, eval_mode=eval_mode, task=task, horizon=horizon)
 		else:
 			a = self.model.pi(z, task)[int(not eval_mode)][0]
 		return a.cpu()
 
 	@torch.no_grad()
-	def _estimate_value(self, z, actions, task):
+	def _estimate_value(self, z, actions, task, horizon):
 		"""Estimate value of a trajectory starting at latent state z and executing given actions."""
 		G, discount = 0, 1
-		for t in range(self.cfg.horizon):
+		for t in range(horizon):
 			reward = math.two_hot_inv(self.model.reward(z, actions[t], task), self.cfg)
 			z = self.model.next(z, actions[t], task)
 			G += discount * reward
@@ -103,7 +107,7 @@ class TDMPC2:
 		return G + discount * self.model.Q(z, self.model.pi(z, task)[1], task, return_type='avg')
 
 	@torch.no_grad()
-	def plan(self, z, t0=False, eval_mode=False, task=None):
+	def plan(self, z, t0=False, eval_mode=False, task=None, horizon=None):
 		"""
 		Plan a sequence of actions using the learned world model.
 		
@@ -116,22 +120,24 @@ class TDMPC2:
 		Returns:
 			torch.Tensor: Action to take in the environment.
 		"""		
+		if horizon is None:
+			horizon = self.cfg.horizon
 		# Sample policy trajectories
 		if self.cfg.num_pi_trajs > 0:
-			pi_actions = torch.empty(self.cfg.horizon, self.cfg.num_pi_trajs, self.cfg.action_dim, device=self.device)
+			pi_actions = torch.empty(horizon, self.cfg.num_pi_trajs, self.cfg.action_dim, device=self.device)
 			_z = z.repeat(self.cfg.num_pi_trajs, 1)
-			for t in range(self.cfg.horizon-1):
+			for t in range(horizon-1):
 				pi_actions[t] = self.model.pi(_z, task)[1]
 				_z = self.model.next(_z, pi_actions[t], task)
 			pi_actions[-1] = self.model.pi(_z, task)[1]
 
 		# Initialize state and parameters
 		z = z.repeat(self.cfg.num_samples, 1)
-		mean = torch.zeros(self.cfg.horizon, self.cfg.action_dim, device=self.device)
-		std = self.cfg.max_std*torch.ones(self.cfg.horizon, self.cfg.action_dim, device=self.device)
+		mean = torch.zeros(horizon, self.cfg.action_dim, device=self.device)
+		std = self.cfg.max_std*torch.ones(horizon, self.cfg.action_dim, device=self.device)
 		if not t0:
 			mean[:-1] = self._prev_mean[1:]
-		actions = torch.empty(self.cfg.horizon, self.cfg.num_samples, self.cfg.action_dim, device=self.device)
+		actions = torch.empty(horizon, self.cfg.num_samples, self.cfg.action_dim, device=self.device)
 		if self.cfg.num_pi_trajs > 0:
 			actions[:, :self.cfg.num_pi_trajs] = pi_actions
 	
@@ -140,13 +146,13 @@ class TDMPC2:
 
 			# Sample actions
 			actions[:, self.cfg.num_pi_trajs:] = (mean.unsqueeze(1) + std.unsqueeze(1) * \
-				torch.randn(self.cfg.horizon, self.cfg.num_samples-self.cfg.num_pi_trajs, self.cfg.action_dim, device=std.device)) \
+				torch.randn(horizon, self.cfg.num_samples-self.cfg.num_pi_trajs, self.cfg.action_dim, device=std.device)) \
 				.clamp(-1, 1)
 			if self.cfg.multitask:
 				actions = actions * self.model._action_masks[task]
 
 			# Compute elite actions
-			value = self._estimate_value(z, actions, task).nan_to_num_(0)
+			value = self._estimate_value(z, actions, task, horizon).nan_to_num_(0)
 			elite_idxs = torch.topk(value.squeeze(1), self.cfg.num_elites, dim=0).indices
 			elite_value, elite_actions = value[elite_idxs], actions[:, elite_idxs]
 
@@ -215,7 +221,7 @@ class TDMPC2:
 		discount = self.discount[task].unsqueeze(-1) if self.cfg.multitask else self.discount
 		return reward + discount * self.model.Q(next_z, pi, task, return_type='min', target=True)
 
-	def update(self, buffer):
+	def update(self, buffer, horizon):
 		"""
 		Main update function. Corresponds to one iteration of model learning.
 		
@@ -237,11 +243,11 @@ class TDMPC2:
 		self.model.train()
 
 		# Latent rollout
-		zs = torch.empty(self.cfg.horizon+1, self.cfg.batch_size, self.cfg.latent_dim, device=self.device)
+		zs = torch.empty(horizon+1, self.cfg.batch_size, self.cfg.latent_dim, device=self.device)
 		z = self.model.encode(obs[0], task)
 		zs[0] = z
 		consistency_loss = 0
-		for t in range(self.cfg.horizon):
+		for t in range(horizon):
 			z = self.model.next(z, action[t], task)
 			consistency_loss += F.mse_loss(z, next_z[t]) * self.cfg.rho**t
 			zs[t+1] = z
@@ -253,13 +259,13 @@ class TDMPC2:
 		
 		# Compute losses
 		reward_loss, value_loss = 0, 0
-		for t in range(self.cfg.horizon):
+		for t in range(horizon):
 			reward_loss += math.soft_ce(reward_preds[t], reward[t], self.cfg).mean() * self.cfg.rho**t
 			for q in range(self.cfg.num_q):
 				value_loss += math.soft_ce(qs[q][t], td_targets[t], self.cfg).mean() * self.cfg.rho**t
-		consistency_loss *= (1/self.cfg.horizon)
-		reward_loss *= (1/self.cfg.horizon)
-		value_loss *= (1/(self.cfg.horizon * self.cfg.num_q))
+		consistency_loss *= (1/horizon)
+		reward_loss *= (1/horizon)
+		value_loss *= (1/(horizon * self.cfg.num_q))
 		total_loss = (
 			self.cfg.consistency_coef * consistency_loss +
 			self.cfg.reward_coef * reward_loss +

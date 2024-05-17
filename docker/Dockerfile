@@ -71,12 +71,15 @@ RUN pip install git+https://github.com/Farama-Foundation/Metaworld.git@04be337a1
 
 # maniskill2
 ENV MS2_ASSET_DIR /root/data
-RUN pip install mani-skill2==0.4.1 && \
-    cd /root && \
-    python -m mani_skill2.utils.download_asset all -y
+RUN pip install mani-skill2==0.4.1
+# RUN pip install mani-skill2==0.4.1 && \
+#     cd /root && \
+#     python -m mani_skill2.utils.download_asset all -y
 
 # myosuite (conflicts with meta-world / mani-skill2)
 # RUN pip install myosuite
+
+RUN git clone https://github.com/Lexseal/tdmpc2.git
 
 # success!
 RUN echo "Successfully built TD-MPC2 Docker image!"
