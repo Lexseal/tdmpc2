@@ -66,7 +66,28 @@ class OnlineTrainer(Trainer):
 		), batch_size=(1,))
 		return td
 
-	def get_horizon(self, steps, consistency_loss_history, increase_stop=150_000):
+	# def get_horizon(self, steps, consistency_loss_history, increase_stop=150_000):
+	# 	"""
+	# 	Return the horizon for the current step, starting at self.cfg.min_horizon and ending at self.cfg.max_horizon
+	# 	We will just do a linear interpolation between the two values.
+	# 	"""
+	# 	new_horizon = int(self.cfg.min_horizon + (self.cfg.max_horizon - self.cfg.min_horizon) * steps / increase_stop)
+	# 	if steps >= increase_stop:
+	# 		if steps % 5000 == 0:
+	# 			# assume consistency_loss_history is full and has 10000 elements
+	# 			first_half_mean = np.mean(list(consistency_loss_history)[:5000])
+	# 			second_half_mean = np.mean(list(consistency_loss_history)[5000:])
+	# 			if second_half_mean < first_half_mean:
+	# 				new_horizon = self.last_horizon - 2
+	# 			else:
+	# 				new_horizon = self.last_horizon + 1
+	# 		else:
+	# 			new_horizon = self.last_horizon
+	# 	new_horizon = max(self.cfg.min_horizon, min(self.cfg.max_horizon, new_horizon))
+	# 	self.last_horizon = new_horizon
+	# 	return new_horizon
+
+	def get_horizon(self, steps, consistency_loss_history, reward_loss_history, value_loss_history, total_loss_history, increase_stop=150_000): #total loss version
 		"""
 		Return the horizon for the current step, starting at self.cfg.min_horizon and ending at self.cfg.max_horizon
 		We will just do a linear interpolation between the two values.
@@ -75,12 +96,12 @@ class OnlineTrainer(Trainer):
 		if steps >= increase_stop:
 			if steps % 5000 == 0:
 				# assume consistency_loss_history is full and has 10000 elements
-				first_half_mean = np.mean(list(consistency_loss_history)[:5000])
-				second_half_mean = np.mean(list(consistency_loss_history)[5000:])
-				if second_half_mean < first_half_mean:
-					new_horizon = self.last_horizon - 2
-				else:
+				first_half_mean = np.mean(list(total_loss_history)[:5000])
+				second_half_mean = np.mean(list(total_loss_history)[5000:])
+				if second_half_mean >= first_half_mean:
 					new_horizon = self.last_horizon + 1
+				else:
+					new_horizon = self.last_horizon - 1
 			else:
 				new_horizon = self.last_horizon
 		new_horizon = max(self.cfg.min_horizon, min(self.cfg.max_horizon, new_horizon))
@@ -93,6 +114,9 @@ class OnlineTrainer(Trainer):
 		# keep track of 5000 steps moving average of consistency loss
 		# to do that need 10000 steps of buffer. use deque
 		consistency_loss_history = deque(maxlen=10000)
+		reward_loss_history = deque(maxlen=10000)
+		value_loss_history = deque(maxlen=10000)
+		total_loss_history = deque(maxlen=10000)
 		while self._step <= self.cfg.steps:
 			# Evaluate agent periodically
 			if self._step % self.cfg.eval_freq == 0:
@@ -118,7 +142,7 @@ class OnlineTrainer(Trainer):
 				obs = self.env.reset()
 				self._tds = [self.to_td(obs)]
 
-			horizon = self.get_horizon(self._step, consistency_loss_history)
+			horizon = self.get_horizon(self._step, consistency_loss_history, reward_loss_history, value_loss_history)
 			# Collect experience
 			if self._step > self.cfg.seed_steps:
 				action = self.agent.act(obs, t0=len(self._tds)==1, horizon=horizon)
@@ -138,6 +162,9 @@ class OnlineTrainer(Trainer):
 					_train_metrics = self.agent.update(self.buffer, horizon)
 				train_metrics.update(_train_metrics)
 				consistency_loss_history.append(_train_metrics['consistency_loss'])
+				reward_loss_history.append(_train_metrics['reward_loss'])
+				value_loss_history.append(_train_metrics['value_loss'])
+				total_loss_history.append(_train_metrics['total_loss'])
 
 			self._step += 1
 	
