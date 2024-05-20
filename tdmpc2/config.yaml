@@ -37,6 +37,7 @@ num_pi_trajs: 24
 min_horizon: 1
 max_horizon: 10
 horizon: 3
+horizon_mode: none
 min_std: 0.05
 max_std: 2
 temperature: 0.5

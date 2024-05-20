@@ -92,18 +92,28 @@ class OnlineTrainer(Trainer):
 		Return the horizon for the current step, starting at self.cfg.min_horizon and ending at self.cfg.max_horizon
 		We will just do a linear interpolation between the two values.
 		"""
-		new_horizon = int(self.cfg.min_horizon + (self.cfg.max_horizon - self.cfg.min_horizon) * steps / increase_stop)
-		if steps >= increase_stop:
-			if steps % 5000 == 0:
-				# assume consistency_loss_history is full and has 10000 elements
+		new_horizon = self.cfg.min_horizon #int(self.cfg.min_horizon + (self.cfg.max_horizon - self.cfg.min_horizon) * steps / increase_stop)
+		#if steps >= increase_stop:
+		if steps >= 10000 and steps % 5000 == 0:
+			# assume consistency_loss_history is full and has 10000 elements
+			if self.cfg.horizon_mode == "inverse-total-loss":
 				first_half_mean = np.mean(list(total_loss_history)[:5000])
 				second_half_mean = np.mean(list(total_loss_history)[5000:])
-				if second_half_mean >= first_half_mean:
+				if second_half_mean < first_half_mean:
+					new_horizon = self.last_horizon + 1
+				else:
+					new_horizon = self.last_horizon - 1
+			elif self.cfg.exp_name == "inverse-reward-loss":
+				first_half_mean = np.mean(list(reward_loss_history)[:5000])
+				second_half_mean = np.mean(list(reward_loss_history)[5000:])
+				if second_half_mean < first_half_mean:
 					new_horizon = self.last_horizon + 1
 				else:
 					new_horizon = self.last_horizon - 1
 			else:
-				new_horizon = self.last_horizon
+				raise Exception("Not a defined mode!")
+			# else:
+			# 	new_horizon = self.last_horizon
 		new_horizon = max(self.cfg.min_horizon, min(self.cfg.max_horizon, new_horizon))
 		self.last_horizon = new_horizon
 		return new_horizon
