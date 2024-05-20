@@ -1,29 +1,29 @@
-import gym
+import gymnasium as gym
 import numpy as np
 from envs.wrappers.time_limit import TimeLimit
 
-import mani_skill2.envs
+import mani_skill.envs
 
 
 MANISKILL_TASKS = {
 	'lift-cube': dict(
-		env='LiftCube-v0',
+		env='LiftCube-v1',
 		control_mode='pd_ee_delta_pos',
 	),
 	'pick-cube': dict(
-		env='PickCube-v0',
+		env='PickCube-v1',
 		control_mode='pd_ee_delta_pos',
 	),
 	'stack-cube': dict(
-		env='StackCube-v0',
+		env='StackCube-v1',
 		control_mode='pd_ee_delta_pos',
 	),
 	'pick-ycb': dict(
-		env='PickSingleYCB-v0',
+		env='PickSingleYCB-v1',
 		control_mode='pd_ee_delta_pose',
 	),
 	'turn-faucet': dict(
-		env='TurnFaucet-v0',
+		env='TurnFaucet-v1',
 		control_mode='pd_ee_delta_pose',
 	),
 }
@@ -42,7 +42,7 @@ class ManiSkillWrapper(gym.Wrapper):
 		)
 
 	def reset(self):
-		return self.env.reset()
+		return self.env.reset()[0]
 	
 	def step(self, action):
 		reward = 0
@@ -67,11 +67,19 @@ def make_env(cfg):
 		raise ValueError('Unknown task:', cfg.task)
 	assert cfg.obs == 'state', 'This task only supports state observations.'
 	task_cfg = MANISKILL_TASKS[cfg.task]
+	# env = gym.make(
+	# 	task_cfg['env'],
+	# 	obs_mode='state',
+	# 	control_mode=task_cfg['control_mode'],
+	# 	# render_camera_cfgs=dict(width=384, height=384),
+	# )
 	env = gym.make(
-		task_cfg['env'],
-		obs_mode='state',
-		control_mode=task_cfg['control_mode'],
-		render_camera_cfgs=dict(width=384, height=384),
+    "PickCube-v1", # there are more tasks e.g. "PushCube-v1", "PegInsertionSide-v1", ...
+    num_envs=1,
+    obs_mode="state", # there is also "state_dict", "rgbd", ...
+    control_mode="pd_ee_delta_pose", # there is also "pd_joint_delta_pos", ...
+    render_mode="human",
+		# max_episode_steps=100
 	)
 	env = ManiSkillWrapper(env, cfg)
 	env = TimeLimit(env, max_episode_steps=100)

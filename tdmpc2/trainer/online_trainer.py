@@ -142,3 +142,6 @@ class OnlineTrainer(Trainer):
 			self._step += 1
 	
 		self.logger.finish(self.agent)
+		# Save final model
+		fp = f"{self.cfg.seed}.pt"
+		self.agent.save(fp)
