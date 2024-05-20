@@ -142,7 +142,7 @@ class OnlineTrainer(Trainer):
 				obs = self.env.reset()
 				self._tds = [self.to_td(obs)]
 
-			horizon = self.get_horizon(self._step, consistency_loss_history, reward_loss_history, value_loss_history)
+			horizon = self.get_horizon(self._step, consistency_loss_history, reward_loss_history, value_loss_history, total_loss_history)
 			# Collect experience
 			if self._step > self.cfg.seed_steps:
 				action = self.agent.act(obs, t0=len(self._tds)==1, horizon=horizon)
