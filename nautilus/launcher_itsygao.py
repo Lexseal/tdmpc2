@@ -73,14 +73,12 @@ def launch_exps(template: str, dest: str, job_prefix: str):
                 
                 python train.py task={env} \
                 model_size=5 \
-                steps=500000 \
+                steps=1000000 \
                 seed={seed} \
-                horizon_mode=inverse-reward-loss \
-                exp_name=inverse-reward-loss \
+                exp_name=baseline-fixed3 \
                 wandb_project=276F \
                 wandb_entity=xinsong_lin \
                 disable_wandb=false
-                
                 
             """,
         }

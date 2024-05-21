@@ -1,0 +1,74 @@
+{
+  "template": "nautilus/job_itsygao_ms2_template.yml",
+  "pgrid": {
+    "seed": [
+      4796,
+      2044,
+      8946,
+      9689,
+      7050
+    ],
+    "env": [
+      "pick-cube"
+    ]
+  },
+  "job_prefix": "baseline-fixed3",
+  "dest": "nautilus/baseline-fixed3",
+  "jobs": {
+    "0": {
+      "job_name": "tsc003-baseline-fixed3-0",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=pick-cube                 model_size=5                 steps=1000000                 seed=4796                 exp_name=baseline-fixed3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n            "
+    },
+    "1": {
+      "job_name": "tsc003-baseline-fixed3-1",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=pick-cube                 model_size=5                 steps=1000000                 seed=2044                 exp_name=baseline-fixed3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n            "
+    },
+    "2": {
+      "job_name": "tsc003-baseline-fixed3-2",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=pick-cube                 model_size=5                 steps=1000000                 seed=8946                 exp_name=baseline-fixed3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n            "
+    },
+    "3": {
+      "job_name": "tsc003-baseline-fixed3-3",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=pick-cube                 model_size=5                 steps=1000000                 seed=9689                 exp_name=baseline-fixed3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n            "
+    },
+    "4": {
+      "job_name": "tsc003-baseline-fixed3-4",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=pick-cube                 model_size=5                 steps=1000000                 seed=7050                 exp_name=baseline-fixed3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n            "
+    }
+  }
+}
