@@ -64,10 +64,23 @@ class OnlineTrainer(Trainer):
 		), batch_size=(1,))
 		return td
 
+	def update_horizon(self, new_horizon=None):
+		# TODO this entire function is new
+		# can make use of _train_metrics, cfg.min_horizon, cfg.max_horizon, etc
+		if new_horizon is None:
+			self.cfg.horizon = self.cfg.horizon
+			self.agent.cfg.horizon = self.cfg.horizon
+		else:
+			self.cfg.horizon = new_horizon
+			self.agent.cfg.horizon = new_horizon
+			print(f"horizon change to {new_horizon}")
+
 	def train(self):
 		"""Train a TD-MPC2 agent."""
+		self.eval_horizons = [1, 2, 3, 4] # TODO
 		train_metrics, done, eval_next = {}, True, True
 		while self._step <= self.cfg.steps:
+			self.update_horizon() # TODO
 
 			# Evaluate agent periodically
 			if self._step % self.cfg.eval_freq == 0:
@@ -76,10 +89,16 @@ class OnlineTrainer(Trainer):
 			# Reset environment
 			if done:
 				if eval_next:
-					eval_metrics = self.eval()
-					eval_metrics.update(self.common_metrics())
-					self.logger.log(eval_metrics, 'eval')
-					eval_next = False
+					# TODO the code under this "if eval_next changes"
+					old_horizon = self.cfg.horizon
+					for curr_eval_horizon in self.eval_horizons:
+						self.update_horizon(curr_eval_horizon)
+						eval_metrics = self.eval()
+						eval_metrics = {f"{k}{curr_eval_horizon}": v for k, v in eval_metrics.items()}
+						eval_metrics.update(self.common_metrics())
+						self.logger.log(eval_metrics, 'eval')
+						eval_next = False
+					self.update_horizon(old_horizon)
 
 				if self._step > 0:
 					train_metrics.update(
@@ -89,12 +108,12 @@ class OnlineTrainer(Trainer):
 					train_metrics.update(self.common_metrics())
 					self.logger.log(train_metrics, 'train')
 					self._ep_idx = self.buffer.add(torch.cat(self._tds))
-
+                
 				obs = self.env.reset()
 				self._tds = [self.to_td(obs)]
 
 			# Collect experience
-			if self._step > self.cfg.seed_steps:
+			if self._step >= self.cfg.seed_steps: # TODO: changed to >=
 				action = self.agent.act(obs, t0=len(self._tds)==1)
 			else:
 				action = self.env.rand_act()

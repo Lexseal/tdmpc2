@@ -287,4 +287,5 @@ class TDMPC2:
 			"total_loss": float(total_loss.mean().item()),
 			"grad_norm": float(grad_norm),
 			"pi_scale": float(self.scale.value),
+			"horizon": self.cfg.horizon
 		}
