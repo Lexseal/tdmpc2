@@ -5,6 +5,7 @@ tdmpc2/wandb/
 
 # HPC
 nautilus/*.yaml
+nautilus/**/*.yml
 *.key
 
 # Byte-compiled / optimized / DLL files
