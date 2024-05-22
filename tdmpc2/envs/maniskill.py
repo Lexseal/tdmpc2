@@ -26,6 +26,10 @@ MANISKILL_TASKS = {
 		env='TurnFaucet-v0',
 		control_mode='pd_ee_delta_pose',
 	),
+	'peg-insertion-side': dict(
+		env='PegInsertionSide-v0',
+		control_mode='pd_ee_delta_pos',
+	),
 }
 
 
