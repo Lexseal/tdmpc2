@@ -26,7 +26,7 @@ class OnlineTrainer(Trainer):
 			total_time=time() - self._start_time,
 		)
 
-	def eval(self):
+	def eval(self, horizon):
 		"""Evaluate a TD-MPC2 agent."""
 		ep_rewards, ep_successes = [], []
 		for i in range(self.cfg.eval_episodes):
@@ -34,7 +34,7 @@ class OnlineTrainer(Trainer):
 			if self.cfg.save_video:
 				self.logger.video.init(self.env, enabled=(i==0))
 			while not done:
-				action = self.agent.act(obs, t0=t==0, eval_mode=True)
+				action = self.agent.act(obs, t0=t==0, eval_mode=True, horizon=horizon)
 				obs, reward, done, info = self.env.step(action)
 				ep_reward += reward
 				t += 1
@@ -135,10 +135,13 @@ class OnlineTrainer(Trainer):
 			# Reset environment
 			if done:
 				if eval_next:
-					eval_metrics = self.eval()
-					eval_metrics.update(self.common_metrics())
-					self.logger.log(eval_metrics, 'eval')
-					eval_next = False
+					for h in [1,2,3,5,7]:
+						eval_metrics = self.eval(h)
+						eval_metrics.update(self.common_metrics())
+						# append the horizon to the eval_metrics keys
+						eval_metrics = {f"{key}-{h}": value for key, value in eval_metrics.items()}
+						self.logger.log(eval_metrics, 'eval')
+						eval_next = False
 
 				if self._step > 0:
 					train_metrics.update(
