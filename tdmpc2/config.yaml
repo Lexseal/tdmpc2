@@ -34,9 +34,11 @@ iterations: 6
 num_samples: 512
 num_elites: 64
 num_pi_trajs: 24
-min_horizon: 1
-max_horizon: 10
-horizon: 3
+start_horizon: 1
+mid_horizon: 10
+reach_mid_horizon: 150_000
+end_horizon: 3
+reach_end_horizon: 300_000
 horizon_mode: none
 min_std: 0.05
 max_std: 2
