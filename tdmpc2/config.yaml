@@ -68,7 +68,7 @@ wandb_project: 276F
 wandb_entity: xinsong_lin
 wandb_silent: false
 disable_wandb: false
-save_csv: true
+save_csv: false
 
 # misc
 save_video: true
