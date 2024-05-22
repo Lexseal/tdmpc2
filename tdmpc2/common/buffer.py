@@ -21,7 +21,8 @@ class Buffer():
 			truncated_key=None,
 			strict_length=True,
 		)
-		self._batch_size = cfg.batch_size * (cfg.max_horizon+1)
+		max_horizon = max(cfg.start_horizon, cfg.mid_horizon, cfg.end_horizon)
+		self._batch_size = cfg.batch_size * (max_horizon+1)
 		self._num_eps = 0
 
 	@property
@@ -92,7 +93,8 @@ class Buffer():
 
 	def sample(self, horizon):
 		"""Sample a batch of subsequences from the buffer."""
-		td = self._buffer.sample().view(-1, self.cfg.max_horizon+1).permute(1, 0)
+		max_horizon = max(self.cfg.start_horizon, self.cfg.mid_horizon, self.cfg.end_horizon)
+		td = self._buffer.sample().view(-1, max_horizon+1).permute(1, 0)
 		# now truncate the batch to the horizon
 		td = td[:horizon+1]
 		return self._prepare_batch(td)
