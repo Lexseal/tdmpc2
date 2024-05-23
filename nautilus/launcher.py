@@ -77,10 +77,10 @@ def launch_exps(template: str, dest: str, job_prefix: str):
                 model_size=5 \
                 steps=500000 \
                 seed={seed} \
-                exp_name=push-cube-fixed5 \
+                exp_name=push-cube-5-3 \
                 start_horizon=5 \
-                mid_horizon=5 \
-                end_horizon=5 \
+                mid_horizon=3 \
+                end_horizon=3 \
                 wandb_project=276F \
                 wandb_entity=xinsong_lin \
                 disable_wandb=false

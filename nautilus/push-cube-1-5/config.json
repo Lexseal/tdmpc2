@@ -1,0 +1,66 @@
+{
+  "template": "nautilus/job_ms3_template.yml",
+  "pgrid": {
+    "seed": [
+      4796,
+      2044,
+      8946,
+      9689
+    ],
+    "env": [
+      "push-cube"
+    ]
+  },
+  "job_prefix": "tdmpc2-push-cube-1-5",
+  "dest": "nautilus/push-cube-1-5",
+  "jobs": {
+    "0": {
+      "job_name": "tsc003-tdmpc2-push-cube-1-5-0",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "storage_request": "50Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=push-cube                 model_size=5                 steps=500000                 seed=4796                 exp_name=push-cube-1-5                 start_horizon=1                 mid_horizon=5                 end_horizon=5                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "1": {
+      "job_name": "tsc003-tdmpc2-push-cube-1-5-1",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "storage_request": "50Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=push-cube                 model_size=5                 steps=500000                 seed=2044                 exp_name=push-cube-1-5                 start_horizon=1                 mid_horizon=5                 end_horizon=5                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "2": {
+      "job_name": "tsc003-tdmpc2-push-cube-1-5-2",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "storage_request": "50Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=push-cube                 model_size=5                 steps=500000                 seed=8946                 exp_name=push-cube-1-5                 start_horizon=1                 mid_horizon=5                 end_horizon=5                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "3": {
+      "job_name": "tsc003-tdmpc2-push-cube-1-5-3",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "storage_request": "50Gi",
+      "gpu_request": 1,
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=push-cube                 model_size=5                 steps=500000                 seed=9689                 exp_name=push-cube-1-5                 start_horizon=1                 mid_horizon=5                 end_horizon=5                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    }
+  }
+}
