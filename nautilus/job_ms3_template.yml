@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $job_name$
+  namespace: ucsd-haosulab
+  labels:
+    nautilus.io/sim: "true"
+
+spec:
+  ttlSecondsAfterFinished: 21600 # give me six hours to for the tmux run potential delay
+  template:
+    spec:
+      containers:
+        - name: work-container
+          image: nicklashansen/tdmpc2:1.0.0 # docker image
+          
+          # imagePullPolicy: Always
+          command:
+            - bash
+            - -c
+            - |
+              cd /root
+              pip install gymnasium
+              pip install --upgrade mani_skill
+              git clone -b kevin_maniskill3 https://github.com/Lexseal/tdmpc2.git
+              cd tdmpc2/tdmpc2
+              wandb login $wandb_key$
+              # run your command here
+              $command$
+          resources:
+            requests:
+              cpu: "$cpu_request$"
+              memory: "$mem_request$"
+              ephemeral-storage: "$storage_request$"
+              nvidia.com/gpu: "$gpu_request$"
+            limits:
+              cpu: "$cpu_request$"
+              memory: "$mem_request$"
+              ephemeral-storage: "$storage_request$"
+              nvidia.com/gpu: "$gpu_request$"
+      restartPolicy: Never
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: nvidia.com/gpu.product
+                  operator: In
+                  values:
+                    - NVIDIA-GeForce-GTX-1080-Ti
+  backoffLimit: 0

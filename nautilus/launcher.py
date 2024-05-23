@@ -77,15 +77,15 @@ def launch_exps(template: str, dest: str, job_prefix: str):
                 model_size=5 \
                 steps=1000000 \
                 seed={seed} \
-                exp_name=stack-cube-5-3 \
-                start_horizon=5 \
-                mid_horizon=3 \
-                end_horizon=3 \
+                exp_name=stack-cube-3-1 \
+                start_horizon=3 \
+                mid_horizon=1 \
+                end_horizon=1 \
                 wandb_project=276F \
                 wandb_entity=xinsong_lin \
                 disable_wandb=false
                 
-                
+                sleep 10300
             """,
         }
         generate_job_file(
