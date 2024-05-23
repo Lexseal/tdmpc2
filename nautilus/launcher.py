@@ -43,14 +43,15 @@ def generate_job_file(template, replace_dict=dict(), dest="job.yml"):
 def launch_exps(template: str, dest: str, job_prefix: str):
     
     # 5th seed: 7050
-    pgrid = {"seed": [4796, 2044, 8946, 9689, 7050],  
-        "env" : ['pick-cube'],}
+    pgrid = {"seed": [4796, 2044, 8946, 9689],  
+        "env" : ['push-cube'],}
           
     # demos=-1 means using all demos
     parameters = ParameterGrid(pgrid)
 
     CPUS = 6 #10
     MEM = "8Gi" #"20Gi"
+    STORAGE = "50Gi"
     GPUS = 1
     print(f"Launch from template {template}. Creating {len(parameters)} jobs and temp yml files to {dest}")
     params_json = dict()
@@ -65,6 +66,7 @@ def launch_exps(template: str, dest: str, job_prefix: str):
             "wandb_key": wandb_key,
             "cpu_request": CPUS,
             "mem_request": MEM,
+            "storage_request": STORAGE,
             "gpu_request": GPUS,
             "cpu_request_limit": CPUS,
             "mem_request_limit": MEM,
@@ -75,7 +77,10 @@ def launch_exps(template: str, dest: str, job_prefix: str):
                 model_size=5 \
                 steps=500000 \
                 seed={seed} \
-                exp_name={env}-baseline \
+                exp_name=push-cube-fixed5 \
+                start_horizon=5 \
+                mid_horizon=5 \
+                end_horizon=5 \
                 wandb_project=276F \
                 wandb_entity=xinsong_lin \
                 disable_wandb=false
