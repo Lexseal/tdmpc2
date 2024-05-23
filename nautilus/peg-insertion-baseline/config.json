@@ -1,0 +1,66 @@
+{
+  "template": "nautilus/job_ms2_template.yml",
+  "pgrid": {
+    "seed": [
+      4796,
+      2044,
+      8946,
+      9689
+    ],
+    "env": [
+      "peg-insertion-side"
+    ]
+  },
+  "job_prefix": "tdmpc2-peg-insertion-baseline",
+  "dest": "nautilus/peg-insertion-baseline",
+  "jobs": {
+    "0": {
+      "job_name": "tsc003-tdmpc2-peg-insertion-baseline-0",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "storage_request": "50Gi",
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=peg-insertion-side                 model_size=5                 steps=2000000                 seed=4796                 exp_name=peg-insertion-baseline                 start_horizon=3                 mid_horizon=3                 end_horizon=3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "1": {
+      "job_name": "tsc003-tdmpc2-peg-insertion-baseline-1",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "storage_request": "50Gi",
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=peg-insertion-side                 model_size=5                 steps=2000000                 seed=2044                 exp_name=peg-insertion-baseline                 start_horizon=3                 mid_horizon=3                 end_horizon=3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "2": {
+      "job_name": "tsc003-tdmpc2-peg-insertion-baseline-2",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "storage_request": "50Gi",
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=peg-insertion-side                 model_size=5                 steps=2000000                 seed=8946                 exp_name=peg-insertion-baseline                 start_horizon=3                 mid_horizon=3                 end_horizon=3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    },
+    "3": {
+      "job_name": "tsc003-tdmpc2-peg-insertion-baseline-3",
+      "wandb_key": "1c2d2fa97c7d29a5f6c6eced6a800c534c9b13cb",
+      "cpu_request": 6,
+      "mem_request": "8Gi",
+      "gpu_request": 1,
+      "storage_request": "50Gi",
+      "cpu_request_limit": 6,
+      "mem_request_limit": "8Gi",
+      "gpu_request_limit": 1,
+      "command": "\n                \n                python train.py task=peg-insertion-side                 model_size=5                 steps=2000000                 seed=9689                 exp_name=peg-insertion-baseline                 start_horizon=3                 mid_horizon=3                 end_horizon=3                 wandb_project=276F                 wandb_entity=xinsong_lin                 disable_wandb=false\n                \n                \n            "
+    }
+  }
+}
