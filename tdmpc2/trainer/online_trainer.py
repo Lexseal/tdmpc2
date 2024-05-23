@@ -76,9 +76,14 @@ class OnlineTrainer(Trainer):
 		# linearly interpolate between start_horizon and mid_horizon
 		if step < self.cfg.reach_mid_horizon:
 			horizon = self.cfg.start_horizon + (self.cfg.mid_horizon - self.cfg.start_horizon) * step / self.cfg.reach_mid_horizon
+			if self.cfg.start_horizon > self.cfg.mid_horizon:
+				horizon = np.ceil(horizon)
+				
 		# linearly interpolate between mid_horizon and end_horizon
 		elif step < self.cfg.reach_end_horizon:
 			horizon = self.cfg.mid_horizon + (self.cfg.end_horizon - self.cfg.mid_horizon) * (step - self.cfg.reach_mid_horizon) / (self.cfg.reach_end_horizon - self.cfg.reach_mid_horizon)
+			if self.cfg.mid_horizon > self.cfg.end_horizon:
+				horizon = np.ceil(horizon)
 		else:
 			horizon = self.cfg.end_horizon
 		return int(horizon)
