@@ -44,7 +44,7 @@ def launch_exps(template: str, dest: str, job_prefix: str):
     
     # 5th seed: 7050
     pgrid = {"seed": [4796, 2044, 8946, 9689],  
-        "env" : ['stack-cube'],}
+        "env" : ['pick-cube'],}
           
     # demos=-1 means using all demos
     parameters = ParameterGrid(pgrid)
@@ -75,14 +75,14 @@ def launch_exps(template: str, dest: str, job_prefix: str):
                 
                 python train.py task={env} \
                 model_size=5 \
-                steps=1000000 \
+                steps=500000 \
                 seed={seed} \
-                exp_name=stack-cube-3-1 \
+                exp_name=baseline \
                 start_horizon=3 \
-                mid_horizon=1 \
-                end_horizon=1 \
-                wandb_project=276F \
-                wandb_entity=xinsong_lin \
+                mid_horizon=3 \
+                end_horizon=3 \
+                wandb_project=tdmpc2_ms3 \
+                wandb_entity=tsc003 \
                 disable_wandb=false
                 
                 sleep 10300
